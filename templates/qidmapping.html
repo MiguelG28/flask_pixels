@@ -1,0 +1,18 @@
+{% block content %}
+
+    <h1>Map QIDs to Vendor File</h1>
+    <form action="" method="POST">
+        {{form.hidden_tag()}}
+        <p>
+            Please enter the QID, BrassRing Field Name and Vendor Tag
+            <br>
+            <h2>QID Number {{ form.qidnumber(size=25) }}<br></h2>
+            <h2>BR Field   {{ form.brfieldname(size=25) }}<br></h2>
+            <h2>Vendor Field   {{ form.vendorfieldname(size=25) }}<br></h2>
+        </p>
+        <p><br>
+        </p>
+        <p><input type="submit" value="Save Fields">
+        </p>
+    </form>
+{% endblock %}
