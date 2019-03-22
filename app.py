@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import pymysql
 #
@@ -105,41 +105,46 @@ import pymysql
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+
+
+
 app = Flask(__name__)
-DATABASE_URI='mysql+mysqlconnector://{user}:{password}@{server}/{database}'.format(user='root', password='qwerty', server='localhost', database='employees')
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:qwerty@localhost/employees'
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 db = SQLAlchemy(app)
 
-# class Employees(db.Model):
-#     emp_no = db.Column(db.Integer, primary_key=True)
-#     birth_date = db.Column(db.Date)
-#     first_name = db.Column(db.String(75))
-#     last_name = db.Column(db.String(75))
-#     gender = db.Column(db.String(75))
-#     hire_date = db.Column(db.Date)
-#
-# test = Employees(emp_no='121212', birth_date='12/12/12', first_name='gatilhada', last_name='meita', gender='M', hire_date='12/12/12')
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True)
-    email = db.Column(db.String(120), unique=True)
+from forms import QIDForm
+from models import User
+DATABASE_URI='mysql+mysqlconnector://{user}:{password}@{server}/{database}'.format(user='root', password='qwerty', server='localhost', database='employees')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+import os
+SECRET_KEY = os.urandom(32)
+app.config['SECRET_KEY'] = SECRET_KEY
 
-    def __init__(self, username, email):
-        self.username = username
-        self.email = email
 
-    def __repr__(self):
-        return '<User %r>' % self.username
+@app.route('/', methods=['GET', 'POST'])
+def qid_map_update():
+    form = QIDForm()
+    if form.validate_on_submit():
+       m = User(username=form.username.data, email=form.email.data)
+       # m.username = form.username.data
+       # m.email = form.email.data
+       db.session.add(m)
+       db.session.commit()
+       return redirect('/')
+    return render_template('qidmapping.html',
+                            title='QID Mapping',
+                            form=form)
 
-admin = User('admin', 'admin@example.com')
 
-db.create_all() # In case user table doesn't exists already. Else remove it.
-
-db.session.add(admin)
-
-db.session.commit() # This is needed to write the changes to database
-
-User.query.all()
-
-User.query.filter_by(username='admin').first()
+@app.route('/test', methods=['GET', 'POST'])
+def qid_map_update_2():
+    form = QIDForm()
+    if form.validate_on_submit():
+       m = User(username=form.username.data, email=form.email.data)
+       # m.username = form.username.data
+       # m.email = form.email.data
+       db.session.add(m)
+       db.session.commit()
+       return jsonify(m.to_json())
+    return render_template('qidmapping.html',
+                            title='QID Mapping',
+                            form=form)
