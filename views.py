@@ -3,7 +3,7 @@ from werkzeug.utils import redirect
 
 from forms import QIDForm
 from models import User
-from app import db, app
+from cenas import db, flask_app
 
 
 # admin = User('admin', 'admin@example.com')

@@ -1,4 +1,4 @@
-from app import db
+from cenas import db
 
 
 class User(db.Model):
