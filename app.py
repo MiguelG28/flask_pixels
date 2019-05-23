@@ -1,41 +1,62 @@
-from flask import Flask, render_template, redirect
+import os
+
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import redirect
+
 from flask_sqlalchemy import SQLAlchemy
 
+
+project_dir = os.path.dirname(os.path.abspath(__file__))
+database_file = "sqlite:///{}".format(os.path.join(project_dir, "bookdatabase.db"))
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config["SQLALCHEMY_DATABASE_URI"] = database_file
+
 db = SQLAlchemy(app)
-from forms import QIDForm
-from models import QIDMapping
 
-import os
-SECRET_KEY = os.urandom(32)
-app.config['SECRET_KEY'] = SECRET_KEY
-# @app.route('/')
-# def student():
-#    return render_template('student.html')
-#
-# @app.route('/result',methods = ['POST', 'GET'])
-# def result():
-#    if request.method == 'POST':
-#       result = request.form
-#       return render_template("results.html",result = result)
-#
-# if __name__ == '__main__':
-#    app.run(debug = True)
+from models import Book
 
 
-@app.route('/qidmapping', methods=['GET', 'POST'])
-def qid_map_update():
-    form = QIDForm()
-    if form.validate_on_submit():
-       m = QIDMapping()
-       m.qid_number = form.qidnumber.data
-       m.br_field_name = form.brfieldname.data
-       m.vendor_field = form.vendorfieldname.data
-       db.session.add(m)
-       # result = QIDMapping.query.all()
-       # print(result[1])
-       return redirect('/qidmapping')
-    return render_template('qidmapping.html',
-                            title='QID Mapping',
-                            form=form)
+@app.route('/', methods=["GET", "POST"])
+def home():
+    books = None
+    if request.form:
+        try:
+            book = Book(title=request.form.get("title"))
+            db.session.add(book)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print("Failed to add book")
+            print(e)
+    books = Book.query.all()
+    return render_template("home.html", books=books)
+
+
+@app.route("/update", methods=["POST"])
+def update():
+    try:
+        newtitle = request.form.get("newtitle")
+        oldtitle = request.form.get("oldtitle")
+        book = Book.query.filter_by(title=oldtitle).first()
+        book.title = newtitle
+        db.session.commit()
+    except Exception as e:
+        print("Couldn't update book title")
+        print(e)
+    return redirect("/")
+
+
+@app.route("/delete", methods=["POST"])
+def delete():
+    title = request.form.get("title")
+    book = Book.query.filter_by(title=title).first()
+    db.session.delete(book)
+    db.session.commit()
+    return redirect("/")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
