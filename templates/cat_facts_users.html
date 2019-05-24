@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+  <table style="width:15%">
+  <tr>
+    <th>user_name</th>
+  </tr>
+{% for user in users %}
+  <tr>
+    {% if user %}
+       <td> <a href="/cat-facts/users/{{ user.0 }}">{{ user.1 }}{{ user.2 }} </a> </td>
+    {% endif %}
+  </tr>
+{% endfor %}
+  </table>
+</body>
+</html>

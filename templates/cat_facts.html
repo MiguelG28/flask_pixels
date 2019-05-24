@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+  <table style="width:100%">
+  <tr>
+    <th>ID</th>
+    <th>Text</th>
+    <th>Type</th>
+    <th>upvotes</th>
+    <th>userupvoted</th>
+    <th>user_id</th>
+    <th>user_first_name</th>
+    <th>user_last_name</th>
+  </tr>
+{% for fact in facts['all'] %}
+
+  <tr>
+    <td>  {{ fact._id }} </td>
+    <td>  {{ fact.text }} </td>
+    <td>  {{ fact.type }} </td>
+    <td>  {{ fact.upvotes }} </td>
+    <td>  {{ fact.userUpvoted }} </td>
+    {% if fact['user'] %}
+      <td>  {{ fact['user']._id }} </td>
+      <td>  {{ fact['user']['name'].first }} </td>
+      <td>  {{ fact['user']['name'].last }} </td>
+    {% else %}
+      <td>---------------</td>
+      <td>---------------</td>
+      <td>---------------</td>
+    {% endif %}
+  </tr>
+
+{% endfor %}
+  </table>
+</body>
+</html>
