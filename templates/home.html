@@ -20,18 +20,18 @@
       {% for book in books %}
         <tr>
           <td>
-            {{book.title}}
+            {{book}}
           </td>
           <td>
             <form method="POST" action="./update" style="display: inline">
-              <input type="hidden" value="{{book.title}}" name="oldtitle">
-              <input type="text" value="{{book.title}}" name="newtitle">
+              <input type="hidden" value="{{ book }}" name="oldtitle">
+              <input type="text" value="{{ book }}" name="newtitle">
               <input type="submit" value="Update">
             </form>
           </td>
           <td>
             <form method="POST" action="./delete" style="display: inline">
-              <input type="hidden" value="{{book.title}}" name="title">
+              <input type="hidden" value="{{ book }}" name="title">
               <input type="submit" value="Delete">
             </form>
           </td>

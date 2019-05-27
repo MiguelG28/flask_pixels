@@ -6,15 +6,11 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import redirect
-
-from flask_sqlalchemy import SQLAlchemy
-
+from flask_pymongo import PyMongo
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
-database_file = "sqlite:///{}".format(os.path.join(project_dir, "bookdatabase.db"))
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = database_file
 
 # MailTrap
 app.config['MAIL_SERVER'] = 'smtp.mailtrap.io'
@@ -23,29 +19,25 @@ app.config['MAIL_USERNAME'] = '957df237871ea9'
 app.config['MAIL_PASSWORD'] = 'c822e3d3dda305'
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
+app.config["MONGO_URI"] = "mongodb+srv://mongo_flask_db:!Alu12345@mongoflask-c8gqv.mongodb.net/mongo_flask_db?retryWrites=true"
 
-db = SQLAlchemy(app)
-
-from models import Book
 from flask_mail import Mail, Message
 mail = Mail(app)
+mongo = PyMongo(app)
+
 
 @app.route('/', methods=["GET", "POST"])
 def home():
-    books = None
     if request.form:
         try:
-            book = Book(title=request.form.get("title"))
-            db.session.add(book)
-            db.session.commit()
-            msg = Message("New book added", sender='yourId@gmail.com', recipients=['id1@gmail.com'])
-            msg.body = book.title
+            title = request.form.get("title")
+            mongo.db.book.insert({'title': title})
+            msg = Message("New book title added", sender='yourId@gmail.com', recipients=['id1@gmail.com'])
             mail.send(msg)
         except Exception as e:
-            db.session.rollback()
             print("Failed to add book")
             print(e)
-    books = Book.query.all()
+    books = mongo.db.book.distinct('title')
     return render_template("home.html", books=books)
 
 
@@ -54,9 +46,7 @@ def update():
     try:
         newtitle = request.form.get("newtitle")
         oldtitle = request.form.get("oldtitle")
-        book = Book.query.filter_by(title=oldtitle).first()
-        book.title = newtitle
-        db.session.commit()
+        mongo.db.book.update({'title': oldtitle},  {'title': newtitle})
     except Exception as e:
         print("Couldn't update book title")
         print(e)
@@ -66,9 +56,7 @@ def update():
 @app.route("/delete", methods=["POST"])
 def delete():
     title = request.form.get("title")
-    book = Book.query.filter_by(title=title).first()
-    db.session.delete(book)
-    db.session.commit()
+    mongo.db.book.remove({'title': title})
     return redirect("/")
 
 
